@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 
 const NavBar = () => {
   const { amount } = useSelector((store) => store.cart);
-  const { cartItems } = useSelector((store) => store.cart);
 
   return (
     <nav>
