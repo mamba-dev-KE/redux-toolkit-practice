@@ -1,12 +1,39 @@
-import { createSlice } from "@reduxjs/toolkit";
-import cartItems from "../../data/cartItems";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import { openModal } from "../modal/modalSlice";
+
+const url = "https://course-api.com/react-useReducer-cart-project";
 
 const initialState = {
-  cartItems: cartItems,
+  cartItems: [],
   amount: 1,
   total: 0,
   isLoading: true,
 };
+
+export const getCartItems = createAsyncThunk(
+  "cart/getCartItems",
+  async (name, thunkAPI) => {
+    try {
+      /**
+       * name: used to show passing parameters from where getCartItems is called
+       * thunkAPI: object containing parameters normally passed to a redux thunk function as well as additional ones. It cntains useful parameters for various functionality including dispatch, getState, extra, requestId, signal
+       */
+
+      // console.log(thunkAPI);
+      // console.log(thunkAPI.getState());
+      // console.log(name);
+
+      // thunkAPI.dispatch(openModal());
+
+      const res = await axios(url);
+      return res.data;
+    } catch (error) {
+      // return console.log(error);
+      return thunkAPI.rejectWithValue("something went wrong");
+    }
+  }
+);
 
 const cartSlice = createSlice({
   name: "cart",
@@ -40,9 +67,21 @@ const cartSlice = createSlice({
       state.total = priceTotals;
     },
   },
+  extraReducers: {
+    [getCartItems.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [getCartItems.fulfilled]: (state, action) => {
+      state.isLoading = false;
+      state.cartItems = action.payload;
+    },
+    [getCartItems.rejected]: (state, action) => {
+      console.log(action);
+      state.isLoading = false;
+    },
+  },
 });
 
-// console.log(cartSlice);
 export const { clearCart, removeItem, increase, decrease, calculateTotals } =
   cartSlice.actions;
 
